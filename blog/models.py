@@ -17,6 +17,18 @@ class PostQuerySet(models.QuerySet):
             published_at__year=year).order_by('published_at')
         return posts_at_year
 
+    def popular(self):
+        popular_posts = self.annotate(
+            likes_count=Count('likes')).order_by('-likes_count')
+        return popular_posts
+    
+    def fetch_with_comments_count(self):
+        most_popular_posts_ids = [post.id for post in self]
+        posts_with_comments = self.model.objects.filter(
+            id__in=most_popular_posts_ids).annotate(
+                comments_count=Count('comments'))
+        return posts_with_comments
+
 
 class Post(models.Model):
     objects = PostQuerySet.as_manager()
