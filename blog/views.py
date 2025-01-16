@@ -86,8 +86,6 @@ def post_detail(request, slug):
 
     likes = post.likes.all()
 
-    related_tags = post.tags.popular().annotate(posts_count=Count("posts"))
-
     serialized_post = {
         'title': post.title,
         'text': post.text,
@@ -104,11 +102,12 @@ def post_detail(request, slug):
 
     most_popular_posts = (
         Post.objects
-        .popular()[:5]
+        .annotate(likes_count=Count("likes"))
         .fetch_with_comments_count()
         .prefetch_related(Prefetch(
             'tags', tags_with_posts_count))
         .prefetch_related('author')
+        .order_by('-likes_count')[:5]
     )
 
     context = {
