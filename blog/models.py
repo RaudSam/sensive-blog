@@ -8,6 +8,9 @@ class TagQuerySet(models.QuerySet):
     def popular(self):
         return self.annotate(posts_count=Count("posts")).order_by("-posts_count")
 
+    def with_posts_count(self):
+        return self.annotate(posts_count=Count("posts"))
+
 
 class PostQuerySet(models.QuerySet):
     def popular(self):
@@ -22,6 +25,14 @@ class PostQuerySet(models.QuerySet):
                 "tags",
                 queryset=Tag.objects.annotate(posts_count=Count("posts"))
             )
+        )
+
+    def for_web(self):
+        return (
+            self.published()
+            .select_related('author')
+            .prefetch_tags_with_posts_count()
+            .fetch_with_comments_count()
         )
 
 
