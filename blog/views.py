@@ -57,8 +57,6 @@ def post_detail(request, slug):
         'author': comment.author.username,
     } for comment in post.comments.all()]
 
-    likes = post.likes.all()
-
     serialized_post = {
         'title': post.title,
         'text': post.text,
